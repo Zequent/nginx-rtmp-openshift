@@ -51,7 +51,7 @@ RUN cd /tmp/build/nginx/${NGINX_VERSION} && \
 
 # Set up config file
 COPY nginx.conf ${NGINX_HOME}/etc/nginx.conf
-
+RUN chown -R nginx:nginx ${NGINX_HOME}
 EXPOSE 1935
 CMD ["/home/nginx/nginx", "-g", "daemon off;"]
 #USER nginx

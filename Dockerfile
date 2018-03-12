@@ -4,7 +4,7 @@ FROM buildpack-deps:jessie
 ENV NGINX_VERSION nginx-1.11.3
 ENV NGINX_RTMP_MODULE_VERSION 1.1.9
 ENV NGINX_HOME=/home/nginx
-ENV PATH "$PATH:/home/nginx/bin:/home/nginx/sbin"
+ENV PATH "$PATH:/home/nginx"
 
 # Install dependencies
 RUN apt-get update && \
@@ -27,7 +27,7 @@ RUN mkdir -p /tmp/build/nginx-rtmp-module && \
 # Build and install Nginx
 # The default puts everything under /usr/local/nginx, so it's needed to change
 # it explicitly. Not just for order but to have it in the PATH
-RUN useradd -U -m nginx && mkdir -p ${NGINX_HOME}/etc && mkdir -p ${NGINX_HOME}/var/{lock,log,run} && chown -R nginx:nginx ${NGINX_HOME}
+RUN useradd -U -m nginx && mkdir -p ${NGINX_HOME}/etc && mkdir -p ${NGINX_HOME}/var/lock && mkdir -p ${NGINX_HOME}/var/log && mkdir -p ${NGINX_HOME}/var/run  && chown -R nginx:nginx ${NGINX_HOME}
 RUN cd /tmp/build/nginx/${NGINX_VERSION} && \
     ./configure \
         --sbin-path=${NGINX_HOME} \
@@ -53,5 +53,5 @@ RUN cd /tmp/build/nginx/${NGINX_VERSION} && \
 COPY nginx.conf ${NGINX_HOME}/etc/nginx.conf
 
 EXPOSE 1935
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["/home/nginx/nginx", "-g", "daemon off;"]
 #USER nginx

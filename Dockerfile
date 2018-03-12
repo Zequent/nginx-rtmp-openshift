@@ -26,7 +26,7 @@ RUN mkdir -p /tmp/build/nginx-rtmp-module && \
 # Build and install Nginx
 # The default puts everything under /usr/local/nginx, so it's needed to change
 # it explicitly. Not just for order but to have it in the PATH
-RUN useradd -U -m nginx && mkdir -p ${NGINX_HOME}/etc && mkdir -p ${NGINX_HOME}/var/{lock,log,run}
+RUN useradd -U -m nginx && mkdir -p ${NGINX_HOME}/etc && mkdir -p ${NGINX_HOME}/var/{lock,log,run} && mkdir -p ${NGINX_HOME}/var/lock/nginx
 RUN cd /tmp/build/nginx/${NGINX_VERSION} && \
     ./configure \
         --sbin-path=${NGINX_HOME} \

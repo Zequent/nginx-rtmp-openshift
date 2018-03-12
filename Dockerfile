@@ -4,6 +4,7 @@ FROM buildpack-deps:jessie
 ENV NGINX_VERSION nginx-1.11.3
 ENV NGINX_RTMP_MODULE_VERSION 1.1.9
 ENV NGINX_HOME=/home/nginx
+ENV PATH "$PATH:/home/nginx/bin:/home/nginx/sbin"
 
 # Install dependencies
 RUN apt-get update && \

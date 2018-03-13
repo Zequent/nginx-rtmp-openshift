@@ -48,7 +48,7 @@ RUN cd /tmp/build/nginx/${NGINX_VERSION} && \
 # Forward logs to Docker
 RUN ln -sf /dev/stdout ${NGINX_HOME}/var/log/access.log && \
     ln -sf /dev/stderr ${NGINX_HOME}/var/log/error.log
-
+RUN ln -sf /tmp ${NGINX_HOME}/var/run && ln -sf /tmp ${NGINX_HOME}/var/lock
 # Set up config file
 COPY nginx.conf ${NGINX_HOME}/etc/nginx.conf
 RUN chown -R nginx:nginx ${NGINX_HOME}

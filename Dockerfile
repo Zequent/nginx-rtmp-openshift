@@ -27,7 +27,7 @@ RUN mkdir -p /tmp/build/nginx-rtmp-module && \
 # Build and install Nginx
 # The default puts everything under /usr/local/nginx, so it's needed to change
 # it explicitly. Not just for order but to have it in the PATH
-RUN useradd -U -m nginx && mkdir -p ${NGINX_HOME}/etc && mkdir -p ${NGINX_HOME}/var/lock && mkdir -p ${NGINX_HOME}/var/log && mkdir -p ${NGINX_HOME}/var/run  && chown -R nginx:nginx ${NGINX_HOME}
+RUN useradd -U -m nginx && mkdir -p ${NGINX_HOME}/etc && mkdir -p ${NGINX_HOME}/var/lock && mkdir -p ${NGINX_HOME}/var/log && mkdir -p ${NGINX_HOME}/var/run  && touch ${NGINX_HOME}/var/log/error.log && touch ${NGINX_HOME}/var/log/access.log && chown -R nginx:nginx ${NGINX_HOME}
 RUN cd /tmp/build/nginx/${NGINX_VERSION} && \
     ./configure \
         --sbin-path=${NGINX_HOME} \
@@ -46,8 +46,8 @@ RUN cd /tmp/build/nginx/${NGINX_VERSION} && \
     rm -rf /tmp/build
 
 # Forward logs to Docker
-#RUN ln -sf /dev/stdout /var/log/nginx/access.log && \
-#    ln -sf /dev/stderr /var/log/nginx/error.log
+RUN ln -sf /dev/stdout ${NGINX_HOME}/var/log/access.log && \
+    ln -sf /dev/stderr ${NGINX_HOME}/var/log/error.log
 
 # Set up config file
 COPY nginx.conf ${NGINX_HOME}/etc/nginx.conf

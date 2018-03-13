@@ -51,7 +51,8 @@ RUN ln -sf /dev/stdout ${NGINX_HOME}/var/log/access.log && \
 RUN ln -sf /tmp ${NGINX_HOME}/var/run && ln -sf /tmp ${NGINX_HOME}/var/lock
 # Set up config file
 COPY nginx.conf ${NGINX_HOME}/etc/nginx.conf
-RUN chown -R nginx:nginx ${NGINX_HOME}
+RUN chgrp -R 0 ${NGINX_HOME} && \
+    chmod -R g=u ${NGINX_HOME}
 EXPOSE 1935
 CMD ["/home/nginx/nginx", "-g", "daemon off;"]
 #USER nginx

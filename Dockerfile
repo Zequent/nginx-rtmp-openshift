@@ -11,13 +11,13 @@ RUN apt-get update && \
     apt-get install -y ca-certificates openssl libssl-dev && \
     rm -rf /var/lib/apt/lists/*
 
-# Download and decompress Nginx
+# Download and extract Nginx
 RUN mkdir -p /tmp/build/nginx && \
     cd /tmp/build/nginx && \
     wget -O ${NGINX_VERSION}.tar.gz https://nginx.org/download/${NGINX_VERSION}.tar.gz && \
     tar -zxf ${NGINX_VERSION}.tar.gz
 
-# Download and decompress RTMP module
+# Download and extract RTMP module
 RUN mkdir -p /tmp/build/nginx-rtmp-module && \
     cd /tmp/build/nginx-rtmp-module && \
     wget -O nginx-rtmp-module-${NGINX_RTMP_MODULE_VERSION}.tar.gz https://github.com/arut/nginx-rtmp-module/archive/v${NGINX_RTMP_MODULE_VERSION}.tar.gz && \
@@ -25,9 +25,13 @@ RUN mkdir -p /tmp/build/nginx-rtmp-module && \
     cd nginx-rtmp-module-${NGINX_RTMP_MODULE_VERSION}
 
 # Build and install Nginx
-# The default puts everything under /usr/local/nginx, so it's needed to change
-# it explicitly. Not just for order but to have it in the PATH
-RUN useradd -U -m nginx && mkdir -p ${NGINX_HOME}/etc && mkdir -p ${NGINX_HOME}/var/lock && mkdir -p ${NGINX_HOME}/var/log && mkdir -p ${NGINX_HOME}/var/run  && touch ${NGINX_HOME}/var/log/error.log && touch ${NGINX_HOME}/var/log/access.log && touch ${NGINX_HOME}/var/run/nginx.pid && touch ${NGINX_HOME}/var/lock/nginx.lock && chown -R nginx:nginx ${NGINX_HOME}
+# We want to build Nginx into a home folder to better comply with
+# openshift security
+RUN useradd -U -m nginx && \
+    mkdir -p ${NGINX_HOME}/etc && \
+    mkdir -p ${NGINX_HOME}/var/lock && \
+    mkdir -p ${NGINX_HOME}/var/log && \
+    mkdir -p ${NGINX_HOME}/var/run
 RUN cd /tmp/build/nginx/${NGINX_VERSION} && \
     ./configure \
         --sbin-path=${NGINX_HOME} \
@@ -45,10 +49,6 @@ RUN cd /tmp/build/nginx/${NGINX_VERSION} && \
     make install && \
     rm -rf /tmp/build
 
-# Forward logs to Docker
-RUN ln -sf /dev/stdout ${NGINX_HOME}/var/log/access.log && \
-    ln -sf /dev/stderr ${NGINX_HOME}/var/log/error.log
-RUN ln -sf /tmp ${NGINX_HOME}/var/run && ln -sf /tmp ${NGINX_HOME}/var/lock
 # Set up config file
 COPY nginx.conf ${NGINX_HOME}/etc/nginx.conf
 RUN chgrp -R 0 ${NGINX_HOME} && \

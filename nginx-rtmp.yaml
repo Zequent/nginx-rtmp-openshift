@@ -1,0 +1,139 @@
+apiVersion: v1
+kind: Template
+metadata:
+  name: Openshift-Template-for-Nginx-RTMP
+  annotations:
+    description: "An rtmp video streaming container based on the Nginx RTMP module"
+    iconClass: "icon-nginx"
+    tags: "nginx,media,stream,video"
+objects:
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: "${APP_NAME}"
+    annotations:
+      description: Keeps track of changes in the application image
+  spec:
+    dockerImageRepository: ''
+    tags:
+    - name: latest
+- kind: BuildConfig
+  apiVersion: v1
+  metadata:
+    name: "${APP_NAME}"
+    annotations:
+      description: Defines how to build the application
+      template.alpha.openshift.io/wait-for-ready: 'true'
+  spec:
+    source:
+      type: "Git"
+      git:
+        uri: "${REPO_URI}"
+        ref: "${REPO_REF}"
+      contextDir: ''
+    strategy:
+      type: Docker
+    output:
+      to:
+        kind: ImageStreamTag
+        name: "${APP_NAME}:latest"
+    triggers:
+    - type: ImageChange
+    - type: ConfigChange
+- kind: DeploymentConfig
+  apiVersion: v1
+  metadata:
+    name: nginx-rtmp
+    annotations:
+      description: Defines how to deploy the application server
+      template.alpha.openshift.io/wait-for-ready: 'true'
+  spec:
+    strategy:
+      type: Recreate
+      recreateParams: {}
+    triggers:
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+        - "${APP_NAME}"
+        from:
+          kind: ImageStreamTag
+          name: "${APP_NAME}:latest"
+    - type: ConfigChange
+    replicas: 1
+    selector:
+      name: "${APP_NAME}"
+    template:
+      metadata:
+        name: "${APP_NAME}"
+        labels:
+          name: "${APP_NAME}"
+      spec:
+        containers:
+        - name: "${APP_NAME}"
+          image: " "
+          ports:
+          - containerPort: 1935
+          resources:
+            limits:
+              memory: "${MEMORY_LIMIT}"
+              cpu: "${CPU_LIMIT}"
+        livenessProbe:
+          -tcpSocket:
+            port: 1935
+          initialDelaySeconds: 15
+          timeoutSeconds: 1
+        - exec:
+            command:
+            - "/usr/bin/python /usr/bin/mcstatus localhost:31565 ping"
+          failureThreshold: 5
+          initialDelaySeconds: 10
+          periodSeconds: 60
+          successThreshold: 1
+          timeoutSeconds: 80
+- kind: Service
+  apiVersion: v1
+  metadata:
+    name: "${SERVER_ID}"
+    annotations:
+      description: Exposes the RTMP port
+  spec:
+    type: NodePort
+    ports:
+    - name: "${SERVER_ID}"
+      port: 1935
+      nodePort: 31935
+    selector:
+      name: "${APP_NAME}"
+parameters:
+- description: Unique name for the application.
+  name: APP_NAME
+  displayName: Application name
+  required: true
+  value: nginx-rtmp
+- description: Github URL for this codebase.
+  name: REPO_URI
+  displayName: Github URL
+  required: true
+  value: https://github.com/jonnymccullagh/nginx-rtmp-docker.git
+- description: Reference level
+  name: REPO_REF
+  displayName: Github Reference for branch
+  required: true
+  value: master
+- description: Internal name for server component.
+  name: SERVER_ID
+  displayName: Server identifier
+  required: true
+  value: rtmp-server-port
+- description: CPU shares available to this pod.
+  name: CPU_LIMIT
+  displayName: CPU Limits
+  required: true
+  value: '1'
+- description: RAM available to this pod.
+  name: MEMORY_LIMIT
+  displayName: Memory Limit
+  required: true
+  value: 1Gi

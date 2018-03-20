@@ -9,8 +9,6 @@ This [**OpenShift**](https://www.openshift.org/) image can be used to create an 
 
 The aim is to allow sending a video stream from [OBS Studio](https://obsproject.com/) to the container and for multiple clients to view the streamed video.
 ![Example OBS/VLC stream](sample.png)
-## Details
-
 
 ## How to use
 

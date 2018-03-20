@@ -1,65 +1,41 @@
-## Supported tags and respective `Dockerfile` links
+# nginx-rtmp-openshift
 
-* [`latest` _(Dockerfile)_](https://github.com/tiangolo/nginx-rtmp-docker/blob/master/Dockerfile)
-
-# nginx-rtmp
-
-[**Docker**](https://www.docker.com/) image with [**Nginx**](http://nginx.org/en/) using the [**nginx-rtmp-module**](https://github.com/arut/nginx-rtmp-module) module for live multimedia (video) streaming.
+OpenShift container image with [**Nginx**](http://nginx.org/en/) and [**nginx-rtmp-module**](https://github.com/arut/nginx-rtmp-module) module for live multimedia (video) streaming.
+This code is a fork from [tiagngolo's Docker image](https://github.com/tiangolo/nginx-rtmp-docker) with config changes for OpenShift.
 
 ## Description
 
-This [**Docker**](https://www.docker.com/) image can be used to create an RTMP server for multimedia / video streaming using [**Nginx**](http://nginx.org/en/) and [**nginx-rtmp-module**](https://github.com/arut/nginx-rtmp-module), built from the current latest sources (Nginx 1.11.3 and nginx-rtmp-module 1.1.9).
+This [**OpenShift**](https://www.openshift.org/) image can be used to create an RTMP server for multimedia / video streaming using [**Nginx**](http://nginx.org/en/) and [**nginx-rtmp-module**](https://github.com/arut/nginx-rtmp-module), built from the current latest sources (Nginx 1.11.3 and nginx-rtmp-module 1.1.9).
 
-This was inspired by other similar previous images from [dvdgiessen](https://hub.docker.com/r/dvdgiessen/nginx-rtmp-docker/), [jasonrivers](https://hub.docker.com/r/jasonrivers/nginx-rtmp/), [aevumdecessus](https://hub.docker.com/r/aevumdecessus/docker-nginx-rtmp/) and by an [OBS Studio post](https://obsproject.com/forum/resources/how-to-set-up-your-own-private-rtmp-server-using-nginx.50/).
-
-The main purpose (and test case) to build it was to allow streaming from [**OBS Studio**](https://obsproject.com/) to different clients at the same time.
-
-**GitHub repo**: <https://github.com/tiangolo/nginx-rtmp-docker>
-
-**Docker Hub image**: <https://hub.docker.com/r/tiangolo/nginx-rtmp/>
-
+The aim is to allow sending a video stream from [OBS Studio](https://obsproject.com/) to the container and for multiple clients to view the streamed video.
+![Example OBS/VLC stream](sample.png)
 ## Details
 
 
 ## How to use
 
-* For the simplest case, just run a container with this image:
-
-```bash
-docker run -d -p 1935:1935 --name nginx-rtmp tiangolo/nginx-rtmp
-```
-
-## How to test with OBS Studio and VLC
-
-
-* Run a container with the command above
-
-
-* Open [OBS Studio](https://obsproject.com/)
+Within an OpenShift (or MiniShift) project choose:
+* From the 'Add to Project' menu choose 'Import YAML/JSON'
+* 'Browse' for or paste the nginx-rtmp.yaml file from this git repo
+* When the container/pod is running open [OBS Studio](https://obsproject.com/)
 * Click the "Settings" button
 * Go to the "Stream" section
 * In "Stream Type" select "Custom Streaming Server"
-* In the "URL" enter the `rtmp://<ip_of_host>/live` replacing `<ip_of_host>` with the IP of the host in which the container is running. For example: `rtmp://192.168.0.30/live`
-* In the "Stream key" use a "key" that will be used later in the client URL to display that specific stream. For example: `test`
+* In the "URL" enter the RTMP address e.g. `rtmp://<ip_of_host>/live` replacing `<ip_of_host>` with the IP of OpenShift. For example: `rtmp://192.168.0.30/live`
+* In the "Stream key" use a "key" that will be used later in the client URL to display that specific stream. For example: `example1`
 * Click the "OK" button
-* In the section "Sources" click de "Add" button (`+`) and select a source (for example "Display Capture") and configure it as you need
+* In the section "Sources" click the "Add" button (`+`) and select a source (for example "Display Capture") and configure it as you need
 * Click the "Start Streaming" button
-
-
-* Open a [VLC](http://www.videolan.org/vlc/index.html) player (it also works in Raspberry Pi using `omxplayer`)
+* Open [VLC](http://www.videolan.org/vlc/index.html) or similar video player (it also works in Raspberry Pi using `omxplayer`)
 * Click in the "Media" menu
 * Click in "Open Network Stream"
-* Enter the URL from above as `rtmp://<ip_of_host>/live/<key>` replacing `<ip_of_host>` with the IP of the host in which the container is running and `<key>` with the key you created in OBS Studio. For example: `rtmp://192.168.0.30/live/test`
+* Enter the URL from above as `rtmp://<ip_of_host>:<host_port>/live/<key>` replacing `<ip_of_host>` with the IP of the host in which the container is running, <host_port> with the nodePort specified in the yaml  and `<key>` with the key you created in OBS Studio. For example: `rtmp://193.168.0.30:31935/live/example1`
 * Click "Play"
 * Now VLC should start playing whatever you are transmitting from OBS Studio
 
 ## Debugging
 
-If something is not working you can check the logs of the container with:
-
-```bash
-docker logs nginx-rtmp
-```
+If something is not working try using the 'Terminal' of the relevant OpenShift Pod.  
 
 ## Extending
 

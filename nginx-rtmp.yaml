@@ -80,18 +80,10 @@ objects:
               memory: "${MEMORY_LIMIT}"
               cpu: "${CPU_LIMIT}"
         livenessProbe:
-          -tcpSocket:
+        - tcpSocket:
             port: 1935
           initialDelaySeconds: 15
           timeoutSeconds: 1
-        - exec:
-            command:
-            - "/usr/bin/python /usr/bin/mcstatus localhost:31565 ping"
-          failureThreshold: 5
-          initialDelaySeconds: 10
-          periodSeconds: 60
-          successThreshold: 1
-          timeoutSeconds: 80
 - kind: Service
   apiVersion: v1
   metadata:

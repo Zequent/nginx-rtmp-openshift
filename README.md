@@ -21,7 +21,7 @@ Within an OpenShift (or MiniShift) project choose:
 * Click the "Settings" button
 * Go to the "Stream" section
 * In "Stream Type" select "Custom Streaming Server"
-* In the "URL" enter the RTMP address e.g. `rtmp://<ip_of_host>/live` replacing `<ip_of_host>` with the IP of OpenShift. For example: `rtmp://192.168.0.30/live`
+* In the "URL" enter the RTMP address e.g. `rtmp://<ip_of_host>:<host_port>/live` replacing `<ip_of_host>` with the IP of OpenShift and <host_port> with the nodePort specified in the yaml. For example: `rtmp://192.168.0.30:31935/live`
 * In the "Stream key" use a "key" that will be used later in the client URL to display that specific stream. For example: `example1`
 * Click the "OK" button
 * In the section "Sources" click the "Add" button (`+`) and select a source (for example "Display Capture") and configure it as you need
@@ -36,37 +36,6 @@ Within an OpenShift (or MiniShift) project choose:
 ## Debugging
 
 If something is not working try using the 'Terminal' of the relevant OpenShift Pod.  
-
-## Extending
-
-If you need to modify the configurations you can create a file `nginx.conf` and replace the one in this image using a `Dockerfile` that is based on the image, for example:
-
-```Dockerfile
-FROM tiangolo/nginx-rtmp
-
-COPY nginx.conf /etc/nginx/nginx.conf
-```
-
-The current `nginx.conf` contains:
-
-```Nginx
-worker_processes auto;
-rtmp_auto_push on;
-events {}
-rtmp {
-    server {
-        listen 1935;
-        listen [::]:1935 ipv6only=on;    
-
-        application live {
-            live on;
-            record off;
-        }
-    }
-}
-```
-
-You can start from it and modify it as you need. Here's the [documentation related to `nginx-rtmp-module`](https://github.com/arut/nginx-rtmp-module/wiki/Directives).
 
 ## Technical details
 

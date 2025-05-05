@@ -1,5 +1,14 @@
 FROM buildpack-deps:jessie
 
+# Setze die Archiv-Repositorys
+RUN echo "deb http://archive.debian.org/debian jessie main contrib non-free" > /etc/apt/sources.list && \
+    echo "deb http://archive.debian.org/debian-security jessie/updates main contrib non-free" >> /etc/apt/sources.list && \
+    echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until
+
+# Installiere Abhängigkeiten
+RUN apt-get update && \
+    apt-get install -y ca-certificates openssl libssl-dev wget && \
+    rm -rf /var/lib/apt/lists/*
 # Versions of Nginx and nginx-rtmp-module to use
 ENV NGINX_VERSION nginx-1.11.3
 ENV NGINX_RTMP_MODULE_VERSION 1.1.9
